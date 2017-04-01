@@ -6,14 +6,15 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class EditorManager : MonoBehaviour {
-	public readonly string SERVERHOST = "https://6bit.uqcloud.net/"; 	//Constant indicating the game server host
-//	public readonly string SERVERHOST = "http://localhost/"; 	//Constant indicating the game server host
-	public static EditorManager instance = null;
-	private BoardManager boardScript;
-	private AccountManager accountScript;
+    //public readonly string SERVERHOST = "https://6bit.uqcloud.net/";  //Constant indicating the game server host
+    //public readonly string SERVERHOST = "http://localhost/";    //Constant indicating the game server host
+    public readonly string SERVERHOST = "http://diegeon.azurewebsites.net/";    //Constant indicating the game server host
+    public static EditorManager instance = null;
+    private BoardManager boardScript;
+    private AccountManager accountScript;
 
-	private int selectingType = -1;
-	private int selectingObj = -1;
+    private int selectingType = -1;
+    private int selectingObj = -1;
     private string mouseState;
 
     private int initx = -1;//record the x position when the mouse left button is clicked
@@ -24,82 +25,82 @@ public class EditorManager : MonoBehaviour {
     private bool freedraw = true;
     private bool full = true;
     void Awake() {
-		if (instance == null)
-			instance = this;
-		else if (instance != this)
-			Destroy(gameObject);
-		//DontDestroyOnLoad(gameObject);
-		boardScript = BoardManager.instance.GetComponent<BoardManager> ();
-		accountScript = AccountManager.instance.GetComponent<AccountManager> ();
-		// if the room is already created, hide the size selection menu
-		if (boardScript.isInitialised ()) {
-			GameObject.Find("RoomSizeMenu").SetActive (false);
-			boardScript.UpdateRoom();
-			boardScript.initPreview();
-		}
-	}
+        if (instance == null)
+            instance = this;
+        else if (instance != this)
+            Destroy(gameObject);
+        //DontDestroyOnLoad(gameObject);
+        boardScript = BoardManager.instance.GetComponent<BoardManager> ();
+        accountScript = AccountManager.instance.GetComponent<AccountManager> ();
+        // if the room is already created, hide the size selection menu
+        if (boardScript.isInitialised ()) {
+            GameObject.Find("RoomSizeMenu").SetActive (false);
+            boardScript.UpdateRoom();
+            boardScript.initPreview();
+        }
+    }
     void InitEditor()
     {
         boardScript.UpdateRoom();
         boardScript.backupRoomData();
         boardScript.initPreview();
     }
-    public void ConfirmRoomSize(){
-		GameObject widthDropdown = GameObject.Find("WidthDropdown");
-		GameObject heightDropdown = GameObject.Find("HeightDropdown");
-		int width = 15;
-		int height = 15;
-		if (widthDropdown.GetComponent<Dropdown> ().value == 1)
-			width = 25;
-		if (widthDropdown.GetComponent<Dropdown> ().value == 2)
-			width = 35;
-		if (heightDropdown.GetComponent<Dropdown> ().value == 1)
-			height = 25;
-		if (heightDropdown.GetComponent<Dropdown> ().value == 2)
-			height = 35;
-		boardScript.columns = width;
-		boardScript.rows = height;
-        
+    public void ConfirmRoomSize() {
+        GameObject widthDropdown = GameObject.Find("WidthDropdown");
+        GameObject heightDropdown = GameObject.Find("HeightDropdown");
+        int width = 15;
+        int height = 15;
+        if (widthDropdown.GetComponent<Dropdown> ().value == 1)
+            width = 25;
+        if (widthDropdown.GetComponent<Dropdown> ().value == 2)
+            width = 35;
+        if (heightDropdown.GetComponent<Dropdown> ().value == 1)
+            height = 25;
+        if (heightDropdown.GetComponent<Dropdown> ().value == 2)
+            height = 35;
+        boardScript.columns = width;
+        boardScript.rows = height;
+
         EditorManager.instance.GetComponent<EditorCameraController>().ResetCamera();
-		GameObject.Find("RoomSizeMenu").SetActive (false);
+        GameObject.Find("RoomSizeMenu").SetActive (false);
         InitEditor();
-	}
+    }
 
-	public void setSelectingType(int typeIdx) {
-		selectingType = typeIdx;
-	}
+    public void setSelectingType(int typeIdx) {
+        selectingType = typeIdx;
+    }
 
-	public void setSelectingObj(int objIdx) {
-		selectingObj = objIdx;
-	}
+    public void setSelectingObj(int objIdx) {
+        selectingObj = objIdx;
+    }
 
-	public int getSelectingObj() {
-		return selectingObj;
-	}
+    public int getSelectingObj() {
+        return selectingObj;
+    }
 
-	// Submit current room to the server
-	public IEnumerator SubmitRoom() {
-		string data = JsonWriter.Serialize(boardScript.getRoomData());
-		string url = SERVERHOST + "game_server/submit_room.php";
-		WWWForm form = new WWWForm();
-		form.AddField("username", accountScript.getUsername());
-		int difficulty = boardScript.getBaseDifficulty ();
-		form.AddField("difficulty", difficulty.ToString());
-		form.AddField("data", data);
-		Debug.Log(form);
+    // Submit current room to the server
+    public IEnumerator SubmitRoom() {
+        string data = JsonWriter.Serialize(boardScript.getRoomData());
+        string url = SERVERHOST + "game_server/submit_room.php";
+        WWWForm form = new WWWForm();
+        form.AddField("username", accountScript.getUsername());
+        int difficulty = boardScript.getBaseDifficulty ();
+        form.AddField("difficulty", difficulty.ToString());
+        form.AddField("data", data);
+        Debug.Log(form);
 
-		WWW www = new WWW(url, form);
-		Debug.Log("Submitting room data: " + data);
-		yield return www;
+        WWW www = new WWW(url, form);
+        Debug.Log("Submitting room data: " + data);
+        yield return www;
 
-		if (www.error != null){
-			Debug.LogError("error:" + www.error);
-			yield break;
-		}
+        if (www.error != null) {
+            Debug.LogError("error:" + www.error);
+            yield break;
+        }
 
-		Debug.Log(www.text);
-	}
-    
+        Debug.Log(www.text);
+    }
+
     void LateUpdate()
     {
         Vector3 mousePositionOnScreen = Input.mousePosition;
@@ -131,23 +132,23 @@ public class EditorManager : MonoBehaviour {
             }
         }
 
-		if (mouseState != "building" && selectingObj != -1 && selectingType != -1)
-		{
-			boardScript.clearTransformChild("indicator");
-		}
+        if (mouseState != "building" && selectingObj != -1 && selectingType != -1)
+        {
+            boardScript.clearTransformChild("indicator");
+        }
 
 
         if (mouseState != "building" && selectingObj != -1 && selectingType != -1 &&
-            mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
-            mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
+                mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
+                mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
         {
             boardScript.ConstructAt(selectingType, selectingObj, mousePositionInWorld.x, mousePositionInWorld.y);
             //selecting object follows the cursor
         }
 
         if (Input.GetMouseButton(0) && //when left button is pressed down
-            mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
-            mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
+                mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
+                mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
         {
             x = (int)(mousePositionInWorld.x + 0.5f);
             y = (int)(mousePositionInWorld.y + 0.5f);
@@ -172,8 +173,8 @@ public class EditorManager : MonoBehaviour {
                 mouseState = "selecting";
                 selectingIDx = boardScript.FindBoardObject(x, y);
                 if (Input.GetMouseButton(1) &&
-            mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
-            mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
+                        mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
+                        mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
                 {
                     mouseState = "canceled";
                     boardScript.clearTransformChild("indicator");
@@ -219,8 +220,8 @@ public class EditorManager : MonoBehaviour {
             }
 
             if (Input.GetMouseButton(1) && //when right button is pressed before left button is released
-            mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
-            mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
+                    mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
+                    mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
             {
                 mouseState = "canceled";
                 boardScript.clearTransformChild("preview");
@@ -230,8 +231,8 @@ public class EditorManager : MonoBehaviour {
 
         }
         else if (Input.GetMouseButtonUp(0) && //when left button is released
-         mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
-         mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
+                 mousePositionInWorld.x >= -0.5f && mousePositionInWorld.x < boardScript.columns - 0.5f &&
+                 mousePositionInWorld.y >= -0.5f && mousePositionInWorld.y < boardScript.rows - 0.5f)
         {
             if (mouseState == "building")
             {
